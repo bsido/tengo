@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	. "github.com/bsido/tengo/parser"
 	"github.com/bsido/tengo/require"
 	"github.com/bsido/tengo/token"
 )
