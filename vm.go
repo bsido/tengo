@@ -682,6 +682,14 @@ func (v *VM) run() {
 			// skip stack overflow check because (newSP) <= (oldSP)
 			v.stack[v.sp-1] = retVal
 			//v.sp++
+		case parser.OpGuard:
+			v.ip++
+
+			value := v.stack[v.sp]
+			if _, ok := value.(*Error); ok {
+				v.err = fmt.Errorf(value.String())
+				return
+			}
 		case parser.OpDefineLocal:
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])

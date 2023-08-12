@@ -448,6 +448,41 @@ a := {
 a.x.e = "bar"`, nil, "not index-assignable")
 }
 
+func TestGuard(t *testing.T) {
+	expectRun(t, `
+fn := func() {
+	return 1
+}
+
+guard out = fn()
+`, nil, 1)
+
+	expectError(t, `
+fn := func() {
+	return error("foo")
+}
+guard out := fn()
+`, nil, "foo")
+
+	expectError(t, `
+fn := func() {
+	return error("failure")
+}
+
+fn_ok := func() {
+	return 1
+}
+
+guard ok := fn_ok()
+
+// fails here
+guard out := fn()
+
+guard x := fn_ok()
+`, nil, "failure")
+
+}
+
 func TestBitwise(t *testing.T) {
 	expectRun(t, `out = 1 & 1`, nil, 1)
 	expectRun(t, `out = 1 & 0`, nil, 0)
