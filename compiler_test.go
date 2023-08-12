@@ -692,237 +692,237 @@ func TestCompiler_Compile(t *testing.T) {
 					tengo.MakeInstruction(parser.OpPop),
 					tengo.MakeInstruction(parser.OpReturn, 0)))))
 
-	//expectCompile(t, `func() { n := 55; return n }`,
-	//	bytecode(
-	//		concatInsts(
-	//			tengo.MakeInstruction(parser.OpConstant, 1),
-	//			tengo.MakeInstruction(parser.OpPop),
-	//			tengo.MakeInstruction(parser.OpSuspend)),
-	//		objectsArray(
-	//			intObject(55),
-	//			compiledFunction(1, 0,
-	//				tengo.MakeInstruction(parser.OpConstant, 0),
-	//				tengo.MakeInstruction(parser.OpDefineLocal, 0),
-	//				tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//				tengo.MakeInstruction(parser.OpReturn, 1)))))
+	expectCompile(t, `func() { n := 55; return n }`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				intObject(55),
+				compiledFunction(1, 0,
+					tengo.MakeInstruction(parser.OpConstant, 0),
+					tengo.MakeInstruction(parser.OpDefineLocal, 0),
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
 
-	//expectCompile(t, `func() { a := 55; b := 77; return a + b }`,
-	//	bytecode(
-	//		concatInsts(
-	//			tengo.MakeInstruction(parser.OpConstant, 2),
-	//			tengo.MakeInstruction(parser.OpPop),
-	//			tengo.MakeInstruction(parser.OpSuspend)),
-	//		objectsArray(
-	//			intObject(55),
-	//			intObject(77),
-	//			compiledFunction(2, 0,
-	//				tengo.MakeInstruction(parser.OpConstant, 0),
-	//				tengo.MakeInstruction(parser.OpDefineLocal, 0),
-	//				tengo.MakeInstruction(parser.OpConstant, 1),
-	//				tengo.MakeInstruction(parser.OpDefineLocal, 1),
-	//				tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//				tengo.MakeInstruction(parser.OpGetLocal, 1),
-	//				tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//				tengo.MakeInstruction(parser.OpReturn, 1)))))
+	expectCompile(t, `func() { a := 55; b := 77; return a + b }`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 2),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				intObject(55),
+				intObject(77),
+				compiledFunction(2, 0,
+					tengo.MakeInstruction(parser.OpConstant, 0),
+					tengo.MakeInstruction(parser.OpDefineLocal, 0),
+					tengo.MakeInstruction(parser.OpConstant, 1),
+					tengo.MakeInstruction(parser.OpDefineLocal, 1),
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpGetLocal, 1),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
 
-	//	expectCompile(t, `f1 := func(a) { return a }; f1(24);`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 0),
-	//				tengo.MakeInstruction(parser.OpSetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpGetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpConstant, 1),
-	//				tengo.MakeInstruction(parser.OpCall, 1, 0),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)),
-	//				intObject(24))))
-	//
-	//	expectCompile(t, `varTest := func(...a) { return a }; varTest(1,2,3);`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 0),
-	//				tengo.MakeInstruction(parser.OpSetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpGetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpConstant, 1),
-	//				tengo.MakeInstruction(parser.OpConstant, 2),
-	//				tengo.MakeInstruction(parser.OpConstant, 3),
-	//				tengo.MakeInstruction(parser.OpCall, 3, 0),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)),
-	//				intObject(1), intObject(2), intObject(3))))
-	//
-	//	expectCompile(t, `f1 := func(a, b, c) { a; b; return c; }; f1(24, 25, 26);`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 0),
-	//				tengo.MakeInstruction(parser.OpSetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpGetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpConstant, 1),
-	//				tengo.MakeInstruction(parser.OpConstant, 2),
-	//				tengo.MakeInstruction(parser.OpConstant, 3),
-	//				tengo.MakeInstruction(parser.OpCall, 3, 0),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				compiledFunction(3, 3,
-	//					tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpPop),
-	//					tengo.MakeInstruction(parser.OpGetLocal, 1),
-	//					tengo.MakeInstruction(parser.OpPop),
-	//					tengo.MakeInstruction(parser.OpGetLocal, 2),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)),
-	//				intObject(24),
-	//				intObject(25),
-	//				intObject(26))))
-	//
-	//	expectCompile(t, `func() { n := 55; n = 23; return n }`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 2),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				intObject(55),
-	//				intObject(23),
-	//				compiledFunction(1, 0,
-	//					tengo.MakeInstruction(parser.OpConstant, 0),
-	//					tengo.MakeInstruction(parser.OpDefineLocal, 0),
-	//					tengo.MakeInstruction(parser.OpConstant, 1),
-	//					tengo.MakeInstruction(parser.OpSetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)))))
-	//	expectCompile(t, `len([]);`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpGetBuiltin, 0),
-	//				tengo.MakeInstruction(parser.OpArray, 0),
-	//				tengo.MakeInstruction(parser.OpCall, 1, 0),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray()))
-	//
-	//	expectCompile(t, `func() { return len([]) }`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 0),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				compiledFunction(0, 0,
-	//					tengo.MakeInstruction(parser.OpGetBuiltin, 0),
-	//					tengo.MakeInstruction(parser.OpArray, 0),
-	//					tengo.MakeInstruction(parser.OpCall, 1, 0),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)))))
-	//
-	//	expectCompile(t, `func(a) { func(b) { return a + b } }`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 1),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetFree, 0),
-	//					tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)),
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
-	//					tengo.MakeInstruction(parser.OpClosure, 0, 1),
-	//					tengo.MakeInstruction(parser.OpPop),
-	//					tengo.MakeInstruction(parser.OpReturn, 0)))))
-	//
-	//	expectCompile(t, `
-	//func(a) {
-	//	return func(b) {
-	//		return func(c) {
-	//			return a + b + c
-	//		}
-	//	}
-	//}`,
-	//		bytecode(
-	//			concatInsts(
-	//				tengo.MakeInstruction(parser.OpConstant, 2),
-	//				tengo.MakeInstruction(parser.OpPop),
-	//				tengo.MakeInstruction(parser.OpSuspend)),
-	//			objectsArray(
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetFree, 0),
-	//					tengo.MakeInstruction(parser.OpGetFree, 1),
-	//					tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//					tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//					tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)),
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetFreePtr, 0),
-	//					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
-	//					tengo.MakeInstruction(parser.OpClosure, 0, 2),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)),
-	//				compiledFunction(1, 1,
-	//					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
-	//					tengo.MakeInstruction(parser.OpClosure, 1, 1),
-	//					tengo.MakeInstruction(parser.OpReturn, 1)))))
+	expectCompile(t, `f1 := func(a) { return a }; f1(24);`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpGetGlobal, 0),
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpCall, 1, 0),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				intObject(24))))
 
-	//expectCompile(t, `
-	//g := 55;
-	//
-	//func() {
-	//	a := 66;
-	//
-	//	return func() {
-	//		b := 77;
-	//
-	//		return func() {
-	//			c := 88;
-	//
-	//			return g + a + b + c;
-	//		}
-	//	}
-	//}`,
-	//	bytecode(
-	//		concatInsts(
-	//			tengo.MakeInstruction(parser.OpConstant, 0),
-	//			tengo.MakeInstruction(parser.OpSetGlobal, 0),
-	//			tengo.MakeInstruction(parser.OpConstant, 6),
-	//			tengo.MakeInstruction(parser.OpPop),
-	//			tengo.MakeInstruction(parser.OpSuspend)),
-	//		objectsArray(
-	//			intObject(55),
-	//			intObject(66),
-	//			intObject(77),
-	//			intObject(88),
-	//			compiledFunction(1, 0,
-	//				tengo.MakeInstruction(parser.OpConstant, 3),
-	//				tengo.MakeInstruction(parser.OpDefineLocal, 0),
-	//				tengo.MakeInstruction(parser.OpGetGlobal, 0),
-	//				tengo.MakeInstruction(parser.OpGetFree, 0),
-	//				tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//				tengo.MakeInstruction(parser.OpGetFree, 1),
-	//				tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//				tengo.MakeInstruction(parser.OpGetLocal, 0),
-	//				tengo.MakeInstruction(parser.OpBinaryOp, 11),
-	//				tengo.MakeInstruction(parser.OpReturn, 1)),
-	//			compiledFunction(1, 0,
-	//				tengo.MakeInstruction(parser.OpConstant, 2),
-	//				tengo.MakeInstruction(parser.OpDefineLocal, 0),
-	//				tengo.MakeInstruction(parser.OpGetFreePtr, 0),
-	//				tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
-	//				tengo.MakeInstruction(parser.OpClosure, 4, 2),
-	//				tengo.MakeInstruction(parser.OpReturn, 1)),
-	//			compiledFunction(1, 0,
-	//				tengo.MakeInstruction(parser.OpConstant, 1),
-	//				tengo.MakeInstruction(parser.OpDefineLocal, 0),
-	//				tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
-	//				tengo.MakeInstruction(parser.OpClosure, 5, 1),
-	//				tengo.MakeInstruction(parser.OpReturn, 1)))))
+	expectCompile(t, `varTest := func(...a) { return a }; varTest(1,2,3);`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpGetGlobal, 0),
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpConstant, 2),
+				tengo.MakeInstruction(parser.OpConstant, 3),
+				tengo.MakeInstruction(parser.OpCall, 3, 0),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				intObject(1), intObject(2), intObject(3))))
+
+	expectCompile(t, `f1 := func(a, b, c) { a; b; return c; }; f1(24, 25, 26);`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpGetGlobal, 0),
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpConstant, 2),
+				tengo.MakeInstruction(parser.OpConstant, 3),
+				tengo.MakeInstruction(parser.OpCall, 3, 0),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				compiledFunction(3, 3,
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpPop),
+					tengo.MakeInstruction(parser.OpGetLocal, 1),
+					tengo.MakeInstruction(parser.OpPop),
+					tengo.MakeInstruction(parser.OpGetLocal, 2),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				intObject(24),
+				intObject(25),
+				intObject(26))))
+
+	expectCompile(t, `func() { n := 55; n = 23; return n }`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 2),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				intObject(55),
+				intObject(23),
+				compiledFunction(1, 0,
+					tengo.MakeInstruction(parser.OpConstant, 0),
+					tengo.MakeInstruction(parser.OpDefineLocal, 0),
+					tengo.MakeInstruction(parser.OpConstant, 1),
+					tengo.MakeInstruction(parser.OpSetLocal, 0),
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
+	expectCompile(t, `len([]);`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpGetBuiltin, 0),
+				tengo.MakeInstruction(parser.OpArray, 0),
+				tengo.MakeInstruction(parser.OpCall, 1, 0),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray()))
+
+	expectCompile(t, `func() { return len([]) }`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				compiledFunction(0, 0,
+					tengo.MakeInstruction(parser.OpGetBuiltin, 0),
+					tengo.MakeInstruction(parser.OpArray, 0),
+					tengo.MakeInstruction(parser.OpCall, 1, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
+
+	expectCompile(t, `func(a) { func(b) { return a + b } }`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetFree, 0),
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
+					tengo.MakeInstruction(parser.OpClosure, 0, 1),
+					tengo.MakeInstruction(parser.OpPop),
+					tengo.MakeInstruction(parser.OpReturn, 0)))))
+
+	expectCompile(t, `
+	func(a) {
+		return func(b) {
+			return func(c) {
+				return a + b + c
+			}
+		}
+	}`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 2),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetFree, 0),
+					tengo.MakeInstruction(parser.OpGetFree, 1),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetFreePtr, 0),
+					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
+					tengo.MakeInstruction(parser.OpClosure, 0, 2),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				compiledFunction(1, 1,
+					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
+					tengo.MakeInstruction(parser.OpClosure, 1, 1),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
+
+	expectCompile(t, `
+	g := 55;
+	
+	func() {
+		a := 66;
+	
+		return func() {
+			b := 77;
+	
+			return func() {
+				c := 88;
+	
+				return g + a + b + c;
+			}
+		}
+	}`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpConstant, 6),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				intObject(55),
+				intObject(66),
+				intObject(77),
+				intObject(88),
+				compiledFunction(1, 0,
+					tengo.MakeInstruction(parser.OpConstant, 3),
+					tengo.MakeInstruction(parser.OpDefineLocal, 0),
+					tengo.MakeInstruction(parser.OpGetGlobal, 0),
+					tengo.MakeInstruction(parser.OpGetFree, 0),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpGetFree, 1),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpGetLocal, 0),
+					tengo.MakeInstruction(parser.OpBinaryOp, 11),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				compiledFunction(1, 0,
+					tengo.MakeInstruction(parser.OpConstant, 2),
+					tengo.MakeInstruction(parser.OpDefineLocal, 0),
+					tengo.MakeInstruction(parser.OpGetFreePtr, 0),
+					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
+					tengo.MakeInstruction(parser.OpClosure, 4, 2),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+				compiledFunction(1, 0,
+					tengo.MakeInstruction(parser.OpConstant, 1),
+					tengo.MakeInstruction(parser.OpDefineLocal, 0),
+					tengo.MakeInstruction(parser.OpGetLocalPtr, 0),
+					tengo.MakeInstruction(parser.OpClosure, 5, 1),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
 
 	expectCompile(t, `for i:=0; i<10; i++ {}`,
 		bytecode(
