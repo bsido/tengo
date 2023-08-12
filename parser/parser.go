@@ -1061,7 +1061,7 @@ func (p *Parser) parseExprList() (list []Expr) {
 	}
 
 	list = append(list, p.parseExpr())
-	for p.token == token.Comma || p.token == token.Guard {
+	for p.token == token.Comma {
 		p.next()
 		list = append(list, p.parseExpr())
 	}
