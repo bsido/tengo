@@ -481,6 +481,20 @@ guard out := fn()
 guard x := fn_ok()
 `, nil, "failure")
 
+	expectError(t, `
+thrower := func() {
+  return error("error inside a function")
+}
+
+fn := func() {
+  guard res := thrower()
+
+  return error("this is an error")
+}
+
+guard test := fn()
+`, nil, "error inside a function")
+
 }
 
 func TestBitwise(t *testing.T) {
