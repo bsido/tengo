@@ -987,6 +987,24 @@ func() {
 				intObject(0),
 				intObject(1))))
 
+	expectCompile(t, `
+function := func() { return 1 }
+guard a := function()`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpGetGlobal, 0),
+				tengo.MakeInstruction(parser.OpCall, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 1),
+				tengo.MakeInstruction(parser.OpGuard, 1),
+				tengo.MakeInstruction(parser.OpSuspend)),
+			objectsArray(
+				intObject(1),
+				compiledFunction(0, 0,
+					tengo.MakeInstruction(parser.OpConstant, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)))))
+
 	// unknown module name
 	expectCompileError(t, `import("user1")`, "module 'user1' not found")
 

@@ -1036,6 +1036,25 @@ func TestParseImport(t *testing.T) {
 	})
 }
 
+func TestParse_Guard(t *testing.T) {
+	expectParse(t, `guard a := function()`, func(p pfn) []Stmt {
+		return stmts(
+			guardStmt(
+				assignStmt(
+					exprs(ident("a", p(1, 7))),
+					exprs(callExpr(
+						ident("function", p(1, 12)),
+						p(1, 20), p(1, 21), NoPos)),
+					token.Define, p(1, 9)),
+				p(1, 9)))
+	})
+
+	expectParseError(t, `a := guard function()`)
+	expectParseError(t, `guard function()`)
+	expectParseError(t, `guard if a == b { return 0 }`)
+	expectParseError(t, `guard for { }`)
+}
+
 func TestParseIndex(t *testing.T) {
 	expectParse(t, "[1, 2, 3][1]", func(p pfn) []Stmt {
 		return stmts(
@@ -1776,6 +1795,15 @@ func assignStmt(
 	return &AssignStmt{LHS: lhs, RHS: rhs, Token: token, TokenPos: pos}
 }
 
+func guardStmt(
+	ass *AssignStmt,
+	pos Pos,
+) *GuardStmt {
+	return &GuardStmt{
+		Assignment: ass, GuardPos: pos,
+	}
+}
+
 func emptyStmt(implicit bool, pos Pos) *EmptyStmt {
 	return &EmptyStmt{Implicit: implicit, Semicolon: pos}
 }
@@ -2048,6 +2076,11 @@ func equalStmt(t *testing.T, expected, actual Stmt) {
 			actual.(*BranchStmt).Token)
 		require.Equal(t, expected.TokenPos,
 			actual.(*BranchStmt).TokenPos)
+	case *GuardStmt:
+		equalStmt(t, expected.Assignment,
+			actual.(*GuardStmt).Assignment)
+		require.Equal(t, expected.GuardPos,
+			actual.(*GuardStmt).GuardPos)
 	default:
 		panic(fmt.Errorf("unknown type: %T", expected))
 	}
