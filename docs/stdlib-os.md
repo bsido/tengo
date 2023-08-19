@@ -49,8 +49,6 @@ os := import("os")
 - `clearenv()`: deletes all environment variables.
 - `environ() => [string]`: returns a copy of strings representing the
   environment.
-- `exit(code int)`: causes the current program to exit with the given status
-  code.
 - `expand_env(s string) => string`: replaces ${var} or $var in the string
   according to the values of the current environment variables.
 - `getegid() => int`: returns the numeric effective group id of the caller.

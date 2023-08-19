@@ -75,6 +75,7 @@ const (
 	For
 	Func
 	Error
+	Exit
 	Immutable
 	If
 	Return
@@ -150,6 +151,7 @@ var tokens = [...]string{
 	For:          "for",
 	Func:         "func",
 	Error:        "error",
+	Exit:         "exit",
 	Immutable:    "immutable",
 	If:           "if",
 	Return:       "return",

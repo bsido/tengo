@@ -33,3 +33,53 @@ if err := call_function(); err != nil {
     os.Exit(1)
 }
 ```
+
+## The `exit` statement
+
+The `exit` statement is used to exit the script either with or without an error.
+This statement can be called with zero or one argument.
+
+```
+exit
+```
+
+which is equivalent to the following `tengo` code:
+
+```go
+os := import("os")
+
+os.exit(0)
+```
+
+> Note: the above function `os.exit` was removed from the standard library in this fork.
+
+If the user wants to exit with an error, the `exit` statement can be called with one argument:
+
+```
+exit <expression>
+```
+
+The `expression` must resolve to a `string` or an `error` value, otherwise the script will fail with an unexpected runtime error.
+Examples:
+
+```go
+exit "error message"
+
+exit error("error message")
+
+function := func() {
+    return error("error message")
+}
+
+exit function()
+```
+
+In the above cases the script will exit with an exit code `1` and print the error message, somewhat ~equivalent to:
+
+```go
+os := import("os")
+fmt := import("fmt")
+
+os.println("error message")
+os.exit(1)
+```

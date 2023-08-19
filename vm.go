@@ -682,6 +682,30 @@ func (v *VM) run() {
 			// skip stack overflow check because (newSP) <= (oldSP)
 			v.stack[v.sp-1] = retVal
 			//v.sp++
+
+		case parser.OpExit:
+			v.ip++
+			var value Object
+			if int(v.curInsts[v.ip]) == 1 {
+				value = v.stack[v.sp-1]
+			} else {
+				value = UndefinedValue
+			}
+			if _, ok := value.(*Error); ok {
+				v.err = fmt.Errorf(value.String())
+				return
+			}
+			if _, ok := value.(*String); ok {
+				v.err = fmt.Errorf(value.String())
+				return
+			}
+			v.sp = v.frames[v.framesIndex].basePointer
+			if value != UndefinedValue {
+				v.err = fmt.Errorf("expected a string or an error value, found %s", value.TypeName())
+			}
+
+			return
+
 		case parser.OpGuard:
 			v.ip++
 

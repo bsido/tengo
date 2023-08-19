@@ -497,6 +497,25 @@ guard test := fn()
 
 }
 
+func TestExit(t *testing.T) {
+	expectRun(t, `exit`, nil, 0)
+	expectRun(t, `
+a := 2
+b := 3
+exit`, nil, 0)
+
+	expectError(t, `exit "failure"`, nil, "failure")
+	expectError(t, `
+fn := func() {
+	return error("failure from fn")
+}
+exit fn()`, nil, "failure from fn")
+	expectError(t, `
+a := 2
+exit "failure"`, nil, "failure")
+	expectError(t, `exit 1`, nil, "expected a string or an error value, found int")
+}
+
 func TestBitwise(t *testing.T) {
 	expectRun(t, `out = 1 & 1`, nil, 1)
 	expectRun(t, `out = 1 & 0`, nil, 0)

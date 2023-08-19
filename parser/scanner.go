@@ -89,7 +89,7 @@ func (s *Scanner) Scan() (
 		literal = s.scanIdentifier()
 		tok = token.Lookup(literal)
 		switch tok {
-		case token.Ident, token.Break, token.Continue, token.Return,
+		case token.Ident, token.Break, token.Continue, token.Return, token.Exit,
 			token.Export, token.True, token.False, token.Undefined:
 			insertSemi = true
 		}
