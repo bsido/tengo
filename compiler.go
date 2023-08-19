@@ -487,6 +487,16 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 			c.emit(node, parser.OpReturn, 1)
 		}
+	case *parser.ExitStmt:
+		if node.Error != nil {
+			if err := c.Compile(node.Error); err != nil {
+				return err
+			}
+			c.emit(node, parser.OpExit, 1)
+		} else {
+			c.emit(node, parser.OpExit, 0)
+		}
+
 	case *parser.GuardStmt:
 		assignment := node.Assignment
 		err := c.compileAssign(assignment, assignment.LHS, assignment.RHS, assignment.Token)

@@ -60,10 +60,6 @@ var osModule = map[string]tengo.Object{
 		Name:  "environ",
 		Value: FuncARSs(os.Environ),
 	}, // environ() => array(string)
-	"exit": &tengo.UserFunction{
-		Name:  "exit",
-		Value: FuncAIR(os.Exit),
-	}, // exit(code int)
 	"expand_env": &tengo.UserFunction{
 		Name:  "expand_env",
 		Value: osExpandEnv,

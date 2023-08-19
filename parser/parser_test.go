@@ -1686,6 +1686,25 @@ func TestParseNumberExpressions(t *testing.T) {
 	})
 }
 
+func TestParse_Exit(t *testing.T) {
+	expectParse(t, `exit`, func(p pfn) []Stmt {
+		return stmts(
+			exitStmt(
+				p(1, 1), nil),
+		)
+	})
+
+	expectParse(t, `exit "fail"`, func(p pfn) []Stmt {
+		return stmts(
+			exitStmt(
+				p(1, 1), stringLit("fail", p(1, 6))),
+		)
+	})
+
+	expectParseError(t, `a := exit`)
+	expectParseError(t, `exit 1 "x"`)
+}
+
 type pfn func(int, int) Pos          // position conversion function
 type expectedFn func(pos pfn) []Stmt // callback function to return expected results
 
@@ -1795,13 +1814,12 @@ func assignStmt(
 	return &AssignStmt{LHS: lhs, RHS: rhs, Token: token, TokenPos: pos}
 }
 
-func guardStmt(
-	ass *AssignStmt,
-	pos Pos,
-) *GuardStmt {
-	return &GuardStmt{
-		Assignment: ass, GuardPos: pos,
-	}
+func guardStmt(ass *AssignStmt, pos Pos) *GuardStmt {
+	return &GuardStmt{Assignment: ass, GuardPos: pos}
+}
+
+func exitStmt(pos Pos, error Expr) *ExitStmt {
+	return &ExitStmt{ExitPos: pos, Error: error}
 }
 
 func emptyStmt(implicit bool, pos Pos) *EmptyStmt {
@@ -2081,6 +2099,9 @@ func equalStmt(t *testing.T, expected, actual Stmt) {
 			actual.(*GuardStmt).Assignment)
 		require.Equal(t, expected.GuardPos,
 			actual.(*GuardStmt).GuardPos)
+	case *ExitStmt:
+		equalExpr(t, expected.Error,
+			actual.(*ExitStmt).Error)
 	default:
 		panic(fmt.Errorf("unknown type: %T", expected))
 	}

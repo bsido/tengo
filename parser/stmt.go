@@ -369,3 +369,31 @@ func (s *ReturnStmt) String() string {
 	}
 	return "return"
 }
+
+// ExitStmt represents an exit statement.
+type ExitStmt struct {
+	ExitPos Pos
+	Error   Expr
+}
+
+func (s *ExitStmt) stmtNode() {}
+
+// Pos returns the position of first character belonging to the node.
+func (s *ExitStmt) Pos() Pos {
+	return s.ExitPos
+}
+
+// End returns the position of first character immediately after the node.
+func (s *ExitStmt) End() Pos {
+	if s.Error != nil {
+		return s.Error.End()
+	}
+	return s.ExitPos + 4
+}
+
+func (s *ExitStmt) String() string {
+	if s.Error != nil {
+		return "exit " + s.Error.String()
+	}
+	return "exit"
+}

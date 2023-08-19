@@ -1035,6 +1035,84 @@ r["x"] = {
 `, "unresolved reference 'fn")
 }
 
+func TestCompile_Exit(t *testing.T) {
+	expectCompile(t, `exit`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpExit),
+				tengo.MakeInstruction(parser.OpSuspend),
+			),
+			nil,
+		),
+	)
+
+	expectCompile(t, `a := 1; exit`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpExit),
+				tengo.MakeInstruction(parser.OpSuspend),
+			),
+			objectsArray(
+				intObject(1),
+			),
+		),
+	)
+
+	expectCompile(t, `exit "failure"`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpExit, 1),
+				tengo.MakeInstruction(parser.OpSuspend),
+			),
+			objectsArray(
+				stringObject("failure"),
+			),
+		),
+	)
+
+	expectCompile(t, `
+x := 1
+exit "failure"`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpExit, 1),
+				tengo.MakeInstruction(parser.OpSuspend),
+			),
+			objectsArray(
+				intObject(1),
+				stringObject("failure"),
+			),
+		),
+	)
+
+	expectCompile(t, `
+function := func() { return 1 }
+exit function()`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpGetGlobal, 0),
+				tengo.MakeInstruction(parser.OpCall, 0),
+				tengo.MakeInstruction(parser.OpExit, 1),
+				tengo.MakeInstruction(parser.OpSuspend),
+			),
+			objectsArray(
+				intObject(1),
+				compiledFunction(0, 0,
+					tengo.MakeInstruction(parser.OpConstant, 0),
+					tengo.MakeInstruction(parser.OpReturn, 1)),
+			),
+		),
+	)
+}
+
 func TestCompilerErrorReport(t *testing.T) {
 	expectCompileError(t, `import("user1")`,
 		"Compile Error: module 'user1' not found\n\tat test:1:1")

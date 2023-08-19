@@ -19,6 +19,7 @@ var stmtStart = map[token.Token]bool{
 	token.Return:   true,
 	token.Export:   true,
 	token.Guard:    true,
+	token.Exit:     true,
 }
 
 // Error represents a parser error.
@@ -692,6 +693,8 @@ func (p *Parser) parseStmt() (stmt Stmt) {
 		return s
 	case token.Return:
 		return p.parseReturnStmt()
+	case token.Exit:
+		return p.parseExitStmt()
 	case token.Export:
 		return p.parseExportStmt()
 	case token.If:
@@ -924,6 +927,25 @@ func (p *Parser) parseReturnStmt() Stmt {
 	return &ReturnStmt{
 		ReturnPos: pos,
 		Result:    x,
+	}
+}
+
+func (p *Parser) parseExitStmt() Stmt {
+	if p.trace {
+		defer untracep(tracep(p, "ExitStmt"))
+	}
+
+	pos := p.pos
+	p.expect(token.Exit)
+
+	var errExpr Expr
+	if p.token != token.Semicolon && p.token != token.RBrace && p.token != token.EOF {
+		errExpr = p.parseExpr()
+	}
+	p.expectSemi()
+	return &ExitStmt{
+		ExitPos: pos,
+		Error:   errExpr,
 	}
 }
 
