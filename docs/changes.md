@@ -30,6 +30,6 @@ and to this `go` code:
 ```go
 if err := call_function(); err != nil {
     println(err)
-	os.Exit(1)
+    os.Exit(1)
 }
 ```
