@@ -73,3 +73,13 @@ function := func() {
 
 exit function()
 ```
+
+In the above cases the script will exit with an exit code `1` and print the error message, somewhat ~equivalent to:
+
+```go
+os := import("os")
+fmt := import("fmt")
+
+os.println("error message")
+os.exit(1)
+```
