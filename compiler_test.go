@@ -1138,6 +1138,30 @@ func TestCompilerErrorReport(t *testing.T) {
 		"Compile Error: export not allowed inside function\n\tat test:1:10")
 }
 
+func TestCompilerIfExpression(t *testing.T) {
+	expectCompile(t, `out := if true { 1 } else { 2 }`,
+		bytecode(
+			concatInsts(
+				tengo.MakeInstruction(parser.OpTrue),
+				tengo.MakeInstruction(parser.OpJumpFalsy, 13),
+				tengo.MakeInstruction(parser.OpConstant, 0),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpReturn, 1),
+				tengo.MakeInstruction(parser.OpJump, 19),
+				tengo.MakeInstruction(parser.OpConstant, 1),
+				tengo.MakeInstruction(parser.OpPop),
+				tengo.MakeInstruction(parser.OpReturn, 1),
+				tengo.MakeInstruction(parser.OpSetGlobal, 0),
+				tengo.MakeInstruction(parser.OpSuspend),
+			),
+			objectsArray(
+				intObject(1),
+				intObject(2),
+			),
+		),
+	)
+}
+
 func TestCompilerDeadCode(t *testing.T) {
 	expectCompile(t, `
 func() {

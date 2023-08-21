@@ -162,7 +162,12 @@ func (p *Parser) parseExpr() Expr {
 		defer untracep(tracep(p, "Expression"))
 	}
 
-	expr := p.parseBinaryExpr(token.LowestPrec + 1)
+	var expr Expr
+	if p.token == token.If {
+		expr = p.parseIfExpr()
+	} else {
+		expr = p.parseBinaryExpr(token.LowestPrec + 1)
+	}
 
 	// ternary conditional expression
 	if p.token == token.Question {
@@ -842,6 +847,69 @@ func (p *Parser) parseIfStmt() Stmt {
 	}
 }
 
+func (p *Parser) parseIfExpr() Expr {
+	if p.trace {
+		defer untracep(tracep(p, "IfExpr"))
+	}
+
+	pos := p.expect(token.If)
+
+	var cond Expr
+	if p.token == token.LBrace {
+		p.error(p.pos, "missing condition in if expression")
+		cond = &BadExpr{From: p.pos, To: p.pos}
+	}
+	condStmt := p.parseSimpleStmt(false)
+	if condStmt != nil {
+		cond = p.makeExpr(condStmt, "boolean expression")
+	}
+
+	body := p.parseBlockExpr()
+	p.checkBlockExpr(body)
+
+	p.expect(token.Else)
+
+	var elseExpr Expr
+	switch p.token {
+	case token.If:
+		elseExpr = p.parseIfExpr()
+	case token.LBrace:
+		elseExprTmp := p.parseBlockExpr()
+		elseExpr = elseExprTmp
+		p.scanner.insertSemi = true
+		p.expectSemi()
+		p.checkBlockExpr(elseExprTmp)
+
+	default:
+		p.errorExpected(p.pos, "if or {")
+		elseExpr = &BadExpr{From: p.pos, To: p.pos}
+	}
+
+	return &IfExpr{
+		IfPos: pos,
+		Cond:  cond,
+		Body:  body,
+		Else:  elseExpr,
+	}
+}
+
+func (p *Parser) checkBlockExpr(block *BlockExpr) {
+	if len(block.Stmts) == 0 {
+		p.errorExpected(block.RBrace, "at least one statement")
+		return
+	}
+
+	lastIndex := len(block.Stmts) - 1
+	lastStmt := block.Stmts[lastIndex]
+	if returnStmt, isReturn := lastStmt.(*ReturnStmt); isReturn {
+		if returnStmt.Result == nil {
+			p.errorExpected(returnStmt.Pos(), "return value")
+		}
+	} else if _, isExpr := lastStmt.(*ExprStmt); !isExpr {
+		p.errorExpected(lastStmt.Pos(), "expression as the last statement")
+	}
+}
+
 func (p *Parser) parseBlockStmt() *BlockStmt {
 	if p.trace {
 		defer untracep(tracep(p, "BlockStmt"))
@@ -851,6 +919,21 @@ func (p *Parser) parseBlockStmt() *BlockStmt {
 	list := p.parseStmtList()
 	rbrace := p.expect(token.RBrace)
 	return &BlockStmt{
+		LBrace: lbrace,
+		RBrace: rbrace,
+		Stmts:  list,
+	}
+}
+
+func (p *Parser) parseBlockExpr() *BlockExpr {
+	if p.trace {
+		defer untracep(tracep(p, "BlockExpr"))
+	}
+
+	lbrace := p.expect(token.LBrace)
+	list := p.parseStmtList()
+	rbrace := p.expect(token.RBrace)
+	return &BlockExpr{
 		LBrace: lbrace,
 		RBrace: rbrace,
 		Stmts:  list,

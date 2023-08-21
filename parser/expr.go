@@ -599,3 +599,57 @@ func (e *UndefinedLit) End() Pos {
 func (e *UndefinedLit) String() string {
 	return "undefined"
 }
+
+// IfExpr represents an if statement.
+type IfExpr struct {
+	IfPos Pos
+	Cond  Expr
+	Body  *BlockExpr
+	Else  Expr // else branch; must not be nil
+}
+
+func (s *IfExpr) exprNode() {}
+
+// Pos returns the position of first character belonging to the node.
+func (s *IfExpr) Pos() Pos {
+	return s.IfPos
+}
+
+// End returns the position of first character immediately after the node.
+func (s *IfExpr) End() Pos {
+	return s.Else.End()
+}
+
+func (s *IfExpr) String() string {
+	var elseStmt string
+	elseStmt = " else " + s.Else.String()
+	return "if " + s.Cond.String() + " " +
+		s.Body.String() + elseStmt
+}
+
+// BlockExpr represents a block expression.
+type BlockExpr struct {
+	Stmts  []Stmt
+	LBrace Pos
+	RBrace Pos
+}
+
+func (s *BlockExpr) exprNode() {}
+
+// Pos returns the position of first character belonging to the node.
+func (s *BlockExpr) Pos() Pos {
+	return s.LBrace
+}
+
+// End returns the position of first character immediately after the node.
+func (s *BlockExpr) End() Pos {
+	return s.RBrace + 1
+}
+
+func (s *BlockExpr) String() string {
+	var list []string
+	for _, e := range s.Stmts {
+		list = append(list, e.String())
+	}
+	return "{" + strings.Join(list, "; ") + "}"
+}

@@ -989,6 +989,76 @@ if a == 5 {
 				p(1, 1)))
 	})
 
+	expectParse(t, "a := if b == 3 { 1 } else { 2 }", func(p pfn) []Stmt {
+		return stmts(
+			assignStmt(
+				exprs(ident("a", p(1, 1))),
+				exprs(
+					ifExpr(
+						binaryExpr(
+							ident("b", p(1, 9)),
+							intLit(3, p(1, 14)),
+							token.Equal,
+							p(1, 11)),
+						blockExpr(
+							p(1, 16), p(1, 20),
+							exprStmt(intLit(1, p(1, 18)))),
+						blockExpr(
+							p(1, 27), p(1, 31),
+							exprStmt(intLit(2, p(1, 29)))),
+						p(1, 6))),
+				token.Define,
+				p(1, 3)))
+	})
+
+	expectParse(t, "a := if b == 3 { 1 } else { return 2 }", func(p pfn) []Stmt {
+		return stmts(
+			assignStmt(
+				exprs(ident("a", p(1, 1))),
+				exprs(
+					ifExpr(
+						binaryExpr(
+							ident("b", p(1, 9)),
+							intLit(3, p(1, 14)),
+							token.Equal,
+							p(1, 11)),
+						blockExpr(
+							p(1, 16), p(1, 20),
+							exprStmt(intLit(1, p(1, 18)))),
+						blockExpr(
+							p(1, 27), p(1, 38),
+							returnStmt(
+								p(1, 29),
+								intLit(2, p(1, 36)))),
+						p(1, 6))),
+				token.Define,
+				p(1, 3)))
+	})
+
+	expectParse(t, "a := if b == 3 { return 1 } else { 2 }", func(p pfn) []Stmt {
+		return stmts(
+			assignStmt(
+				exprs(ident("a", p(1, 1))),
+				exprs(
+					ifExpr(
+						binaryExpr(
+							ident("b", p(1, 9)),
+							intLit(3, p(1, 14)),
+							token.Equal,
+							p(1, 11)),
+						blockExpr(
+							p(1, 16), p(1, 27),
+							returnStmt(
+								p(1, 18),
+								intLit(1, p(1, 25)))),
+						blockExpr(
+							p(1, 34), p(1, 38),
+							exprStmt(intLit(2, p(1, 36)))),
+						p(1, 6))),
+				token.Define,
+				p(1, 3)))
+	})
+
 	expectParseError(t, `if {}`)
 	expectParseError(t, `if a == b { } else a != b { }`)
 	expectParseError(t, `if a == b { } else if { }`)
@@ -996,6 +1066,13 @@ if a == 5 {
 	expectParseError(t, `if ; {}`)
 	expectParseError(t, `if a := 3; {}`)
 	expectParseError(t, `if ; a < 3 {}`)
+	expectParseError(t, `a := if a < 3 { 1 }`)
+	expectParseError(t, `a := if a == 1 { continue } else { 2 }`)
+	expectParseError(t, `a := if a == 1 { 1 } else { continue }`)
+	expectParseError(t, `a := if a == 1 { return } else { 2 }`)
+	expectParseError(t, `a := if a == 1 { 1 } else { return }`)
+	expectParseError(t, `a := if a == 1 { 1 } else { }`)
+	expectParseError(t, `a := if a == 1 { } else { 2 }`)
 }
 
 func TestParseImport(t *testing.T) {
@@ -1865,6 +1942,17 @@ func ifStmt(
 	}
 }
 
+func ifExpr(
+	cond Expr,
+	body *BlockExpr,
+	elseStmt Expr,
+	pos Pos,
+) *IfExpr {
+	return &IfExpr{
+		Cond: cond, Body: body, Else: elseStmt, IfPos: pos,
+	}
+}
+
 func incDecStmt(
 	expr Expr,
 	tok token.Token,
@@ -1879,6 +1967,10 @@ func funcType(params *IdentList, pos Pos) *FuncType {
 
 func blockStmt(lbrace, rbrace Pos, list ...Stmt) *BlockStmt {
 	return &BlockStmt{Stmts: list, LBrace: lbrace, RBrace: rbrace}
+}
+
+func blockExpr(lbrace, rbrace Pos, list ...Stmt) *BlockExpr {
+	return &BlockExpr{Stmts: list, LBrace: lbrace, RBrace: rbrace}
 }
 
 func ident(name string, pos Pos) *Ident {
@@ -2249,6 +2341,22 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			actual.(*CondExpr).QuestionPos)
 		require.Equal(t, expected.ColonPos,
 			actual.(*CondExpr).ColonPos)
+	case *IfExpr:
+		equalExpr(t, expected.Cond,
+			actual.(*IfExpr).Cond)
+		equalExpr(t, expected.Body,
+			actual.(*IfExpr).Body)
+		equalExpr(t, expected.Else,
+			actual.(*IfExpr).Else)
+		require.Equal(t, expected.IfPos,
+			actual.(*IfExpr).IfPos)
+	case *BlockExpr:
+		require.Equal(t, expected.LBrace,
+			actual.(*BlockExpr).LBrace)
+		require.Equal(t, expected.RBrace,
+			actual.(*BlockExpr).RBrace)
+		equalStmts(t, expected.Stmts,
+			actual.(*BlockExpr).Stmts)
 	default:
 		panic(fmt.Errorf("unknown type: %T", expected))
 	}

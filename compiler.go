@@ -269,6 +269,36 @@ func (c *Compiler) Compile(node parser.Node) error {
 			curPos := len(c.currentInstructions())
 			c.changeOperand(jumpPos1, curPos)
 		}
+	case *parser.IfExpr:
+		// open new symbol table for the statement
+		c.symbolTable = c.symbolTable.Fork(true)
+		defer func() {
+			c.symbolTable = c.symbolTable.Parent(false)
+		}()
+
+		if err := c.Compile(node.Cond); err != nil {
+			return err
+		}
+
+		// first jump placeholder
+		jumpPos1 := c.emit(node, parser.OpJumpFalsy, 0)
+		if err := c.Compile(node.Body); err != nil {
+			return err
+		}
+
+		// second jump placeholder
+		jumpPos2 := c.emit(node, parser.OpJump, 0)
+
+		// update first jump offset
+		curPos := len(c.currentInstructions())
+		c.changeOperand(jumpPos1, curPos)
+		if err := c.Compile(node.Else); err != nil {
+			return err
+		}
+
+		// update second jump offset
+		curPos = len(c.currentInstructions())
+		c.changeOperand(jumpPos2, curPos)
 	case *parser.ForStmt:
 		return c.compileForStmt(node)
 	case *parser.ForInStmt:
@@ -307,6 +337,23 @@ func (c *Compiler) Compile(node parser.Node) error {
 				return err
 			}
 		}
+	case *parser.BlockExpr:
+		c.symbolTable = c.symbolTable.Fork(true)
+		defer func() {
+			c.symbolTable = c.symbolTable.Parent(false)
+		}()
+
+		for _, stmt := range node.Stmts {
+			if err := c.Compile(stmt); err != nil {
+				return err
+			}
+		}
+
+		lastStmt := node.Stmts[len(node.Stmts)-1:][0]
+		if _, isReturn := lastStmt.(*parser.ReturnStmt); !isReturn {
+			c.emit(node, parser.OpReturn, 1)
+		}
+
 	case *parser.AssignStmt:
 		err := c.compileAssign(node, node.LHS, node.RHS, node.Token)
 		if err != nil {
@@ -496,7 +543,6 @@ func (c *Compiler) Compile(node parser.Node) error {
 		} else {
 			c.emit(node, parser.OpExit, 0)
 		}
-
 	case *parser.GuardStmt:
 		assignment := node.Assignment
 		err := c.compileAssign(assignment, assignment.LHS, assignment.RHS, assignment.Token)
