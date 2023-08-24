@@ -2092,6 +2092,20 @@ out = if false {
 }
 `, nil, 2)
 
+	expectRun(t, `
+function := func() {
+	return 2
+}
+
+out = func() {
+	return if false {
+		1
+	} else {
+		function()
+	}
+}()
+`, nil, 2)
+
 }
 
 func TestImmutable(t *testing.T) {
