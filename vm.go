@@ -673,14 +673,17 @@ func (v *VM) run() {
 				retVal = UndefinedValue
 			}
 			//v.sp--
-			v.framesIndex--
-			v.curFrame = &v.frames[v.framesIndex-1]
-			v.curInsts = v.curFrame.fn.Instructions
-			v.ip = v.curFrame.ip
-			//v.sp = lastFrame.basePointer - 1
-			v.sp = v.frames[v.framesIndex].basePointer
-			// skip stack overflow check because (newSP) <= (oldSP)
-			v.stack[v.sp-1] = retVal
+			// this will happen only in case of a function call
+			if v.framesIndex != 1 {
+				v.framesIndex--
+				v.curFrame = &v.frames[v.framesIndex-1]
+				v.curInsts = v.curFrame.fn.Instructions
+				v.ip = v.curFrame.ip
+				//v.sp = lastFrame.basePointer - 1
+				v.sp = v.frames[v.framesIndex].basePointer
+				// skip stack overflow check because (newSP) <= (oldSP)
+				v.stack[v.sp-1] = retVal
+			}
 			//v.sp++
 
 		case parser.OpExit:

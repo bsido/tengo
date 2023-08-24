@@ -1002,10 +1002,10 @@ if a == 5 {
 							p(1, 11)),
 						blockExpr(
 							p(1, 16), p(1, 20),
-							exprStmt(intLit(1, p(1, 18)))),
+							intLit(1, p(1, 18))),
 						blockExpr(
 							p(1, 27), p(1, 31),
-							exprStmt(intLit(2, p(1, 29)))),
+							intLit(2, p(1, 29))),
 						p(1, 6))),
 				token.Define,
 				p(1, 3)))
@@ -1024,9 +1024,10 @@ if a == 5 {
 							p(1, 11)),
 						blockExpr(
 							p(1, 16), p(1, 20),
-							exprStmt(intLit(1, p(1, 18)))),
+							intLit(1, p(1, 18))),
 						blockExpr(
 							p(1, 27), p(1, 38),
+							nil,
 							returnStmt(
 								p(1, 29),
 								intLit(2, p(1, 36)))),
@@ -1048,12 +1049,13 @@ if a == 5 {
 							p(1, 11)),
 						blockExpr(
 							p(1, 16), p(1, 27),
+							nil,
 							returnStmt(
 								p(1, 18),
 								intLit(1, p(1, 25)))),
 						blockExpr(
 							p(1, 34), p(1, 38),
-							exprStmt(intLit(2, p(1, 36)))),
+							intLit(2, p(1, 36))),
 						p(1, 6))),
 				token.Define,
 				p(1, 3)))
@@ -1969,8 +1971,8 @@ func blockStmt(lbrace, rbrace Pos, list ...Stmt) *BlockStmt {
 	return &BlockStmt{Stmts: list, LBrace: lbrace, RBrace: rbrace}
 }
 
-func blockExpr(lbrace, rbrace Pos, list ...Stmt) *BlockExpr {
-	return &BlockExpr{Stmts: list, LBrace: lbrace, RBrace: rbrace}
+func blockExpr(lbrace, rbrace Pos, result Expr, list ...Stmt) *BlockExpr {
+	return &BlockExpr{Stmts: list, LBrace: lbrace, RBrace: rbrace, Result: result}
 }
 
 func ident(name string, pos Pos) *Ident {
@@ -2357,6 +2359,8 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			actual.(*BlockExpr).RBrace)
 		equalStmts(t, expected.Stmts,
 			actual.(*BlockExpr).Stmts)
+		equalExpr(t, expected.Result,
+			actual.(*BlockExpr).Result)
 	default:
 		panic(fmt.Errorf("unknown type: %T", expected))
 	}

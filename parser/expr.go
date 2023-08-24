@@ -630,6 +630,7 @@ func (s *IfExpr) String() string {
 // BlockExpr represents a block expression.
 type BlockExpr struct {
 	Stmts  []Stmt
+	Result Expr
 	LBrace Pos
 	RBrace Pos
 }
@@ -650,6 +651,9 @@ func (s *BlockExpr) String() string {
 	var list []string
 	for _, e := range s.Stmts {
 		list = append(list, e.String())
+	}
+	if s.Result != nil {
+		list = append(list, s.Result.String())
 	}
 	return "{" + strings.Join(list, "; ") + "}"
 }

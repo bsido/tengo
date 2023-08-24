@@ -865,7 +865,7 @@ func (p *Parser) parseIfExpr() Expr {
 	}
 
 	body := p.parseBlockExpr()
-	p.checkBlockExpr(body)
+	//p.checkBlockExpr(body)
 
 	p.expect(token.Else)
 
@@ -878,7 +878,7 @@ func (p *Parser) parseIfExpr() Expr {
 		elseExpr = elseExprTmp
 		p.scanner.insertSemi = true
 		p.expectSemi()
-		p.checkBlockExpr(elseExprTmp)
+		//p.checkBlockExpr(elseExprTmp)
 
 	default:
 		p.errorExpected(p.pos, "if or {")
@@ -893,22 +893,22 @@ func (p *Parser) parseIfExpr() Expr {
 	}
 }
 
-func (p *Parser) checkBlockExpr(block *BlockExpr) {
-	if len(block.Stmts) == 0 {
-		p.errorExpected(block.RBrace, "at least one statement")
-		return
-	}
-
-	lastIndex := len(block.Stmts) - 1
-	lastStmt := block.Stmts[lastIndex]
-	if returnStmt, isReturn := lastStmt.(*ReturnStmt); isReturn {
-		if returnStmt.Result == nil {
-			p.errorExpected(returnStmt.Pos(), "return value")
-		}
-	} else if _, isExpr := lastStmt.(*ExprStmt); !isExpr {
-		p.errorExpected(lastStmt.Pos(), "expression as the last statement")
-	}
-}
+//func (p *Parser) checkBlockExpr(block *BlockExpr) {
+//	if len(block.Stmts) == 0 {
+//		p.errorExpected(block.RBrace, "at least one statement")
+//		return
+//	}
+//
+//	lastIndex := len(block.Stmts) - 1
+//	lastStmt := block.Stmts[lastIndex]
+//	if returnStmt, isReturn := lastStmt.(*ReturnStmt); isReturn {
+//		if returnStmt.Result == nil {
+//			p.errorExpected(returnStmt.Pos(), "return value")
+//		}
+//	} else if _, isExpr := lastStmt.(*ExprStmt); !isExpr {
+//		p.errorExpected(lastStmt.Pos(), "expression as the last statement")
+//	}
+//}
 
 func (p *Parser) parseBlockStmt() *BlockStmt {
 	if p.trace {
@@ -932,11 +932,28 @@ func (p *Parser) parseBlockExpr() *BlockExpr {
 
 	lbrace := p.expect(token.LBrace)
 	list := p.parseStmtList()
+	if len(list) == 0 {
+		p.errorExpected(p.pos, "at least one statement")
+		return nil
+	}
+	lastStmt := list[len(list)-1]
+	var result Expr
+	if returnStmt, isReturn := lastStmt.(*ReturnStmt); !isReturn {
+		result = p.makeExpr(lastStmt, "value expression")
+		// remove the last statement
+		list = list[:len(list)-1]
+	} else {
+		if returnStmt.Result == nil {
+			p.errorExpected(returnStmt.Pos(), "return value")
+		}
+	}
+
 	rbrace := p.expect(token.RBrace)
 	return &BlockExpr{
 		LBrace: lbrace,
 		RBrace: rbrace,
 		Stmts:  list,
+		Result: result,
 	}
 }
 
